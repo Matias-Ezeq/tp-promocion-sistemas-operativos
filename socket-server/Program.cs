@@ -1,4 +1,8 @@
-﻿class Server
+﻿using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Sockets;
+
+class Server
 {
     static ConcurrentDictionary<string, TcpClient> clientes =
         new ConcurrentDictionary<string, TcpClient>();
