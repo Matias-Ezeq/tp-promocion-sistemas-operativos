@@ -27,7 +27,7 @@ class Client
 
         while(true){
             var message = Console.ReadLine().Trim();
-            if (message == "exit") break;
+            if (message == "EXIT") break;
             writer.WriteLine("MSG:" + message);
         }
     }
@@ -48,15 +48,15 @@ class Client
         var received = response.Split(":");
         string type = received[0];
         string nick = received[1];
-        string content;
+        string message;
 
         try
         {
-            content = received[2];
+            message = received[2];
         }
         catch (IndexOutOfRangeException)
         {
-             content = "";
+             message = "";
         }
 
         string output;
@@ -67,7 +67,7 @@ class Client
             output = $"[+] {nick} se conectó";
             break;
         case "MSG":
-            output = $"[{nick}]: {content}";
+            output = $"[{nick}]: {message}";
             break;
         case "LEAVE":
             output = $"[-] {nick} se desconectó";
