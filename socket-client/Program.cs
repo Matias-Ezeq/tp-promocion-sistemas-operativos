@@ -19,7 +19,7 @@ class Client
         while (nickname == null)
         {
             Console.Write("Error, usuario inválido.\n Ingrese su nickname:");
-            nickname = Console.ReadLine();
+            nickname = Console.ReadLine().Trim();
         }
 
         writer.WriteLine("HELLO:" + nickname);
@@ -27,8 +27,7 @@ class Client
         hiloReader.Start();
 
         while(true){
-            Console.Write($"[{nickname}] > ");
-            var message = Console.ReadLine();
+            var message = Console.ReadLine().Trim();
             if (message == "exit") break;
             writer.WriteLine("MSG:" + message);
         }
@@ -38,8 +37,48 @@ class Client
     {
         while(true){
             var response = reader.ReadLine();
-            Console.WriteLine(response);
+
+            string output = responseParser(response);
+            
+            Console.WriteLine(output);
         }
+    }
+
+    private static string responseParser(string response)
+    {
+        var received = response.Split(":");
+        string type = received[0];
+        string nick = received[1];
+        string content;
+
+        try
+        {
+            content = received[2];
+        }
+        catch (IndexOutOfRangeException)
+        {
+             content = "";
+        }
+
+        string output;
+
+        switch(type) 
+        {
+        case "JOIN":
+            output = $"[+] {nick} se conectó";
+            break;
+        case "MSG":
+            output = $"[{nick}]: {content}";
+            break;
+        case "LEAVE":
+            output = $"[-] {nick} se desconectó";
+            break;
+        default:
+            output = response;
+            break;
+        }
+
+        return output;
     }
 
 }
