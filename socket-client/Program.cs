@@ -11,24 +11,15 @@ class Client
         using NetworkStream stream = client.GetStream();
         StreamReader reader = new(stream);
         StreamWriter writer = new(stream) { AutoFlush = true };
+        string message;
 
-        Console.Write("Ingrese su nickname:");
-        string nickname = Console.ReadLine();
-
-        while (nickname == null)
-        {
-            Console.Write("Error, usuario inválido.\n Ingrese su nickname:");
-            nickname = Console.ReadLine().Trim();
-        }
-
-        writer.WriteLine("HELLO:" + nickname);
         Thread hiloReader = new(() => serverResponse(reader)){IsBackground = true};
         hiloReader.Start();
 
         while(true){
-            var message = Console.ReadLine().Trim();
+            message = Console.ReadLine().Trim();
             if (message == "EXIT") break;
-            writer.WriteLine("MSG:" + message);
+            writer.WriteLine(message);
         }
     }
 
