@@ -28,17 +28,15 @@ class Client
         while(true){
             var response = reader.ReadLine();
 
-            string output = responseParser(response);
-            
-            Console.WriteLine(output);
+            responseHandler(response);
         }
     }
 
-    private static string responseParser(string response)
+    private static void responseHandler(string response)
     {
         var received = response.Split(":");
         string type = received[0];
-        string nick = received[1];
+        string content = received[1];
         string message;
 
         try
@@ -50,25 +48,28 @@ class Client
              message = "";
         }
 
-        string output;
-
         switch(type) 
         {
+        case "OK":
+            Console.WriteLine("[OK] " + content);
+            break;
+        case "ERROR":
+            Console.WriteLine("[ERROR] " + response);
+            //ToDo: crear funcion setNickname Y volver a llamarla en case de error
+            break;
         case "JOIN":
-            output = $"[+] {nick} se conectó";
+            Console.WriteLine($"[+] {content} se conectó.");
             break;
         case "MSG":
-            output = $"[{nick}]: {message}";
+            Console.WriteLine($"[{content}]: {message}");
             break;
         case "LEAVE":
-            output = $"[-] {nick} se desconectó";
+            Console.WriteLine($"[-] {content} se desconectó.");
             break;
         default:
-            output = response;
+            Console.WriteLine(response);
             break;
         }
-
-        return output;
     }
 
 }
