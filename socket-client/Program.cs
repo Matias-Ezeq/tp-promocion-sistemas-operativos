@@ -1,32 +1,54 @@
-﻿using System.Net.Sockets;
+﻿using System.Dynamic;
+using System.Net.Sockets;
 
 class Client
 {
     static void Main()
     {
+        Globals.loggedIn = false;
         const string serverIp = "127.0.0.1";
         const int serverPort = 5000;
         
         using var client = new TcpClient(serverIp, serverPort);
         using NetworkStream stream = client.GetStream();
-        StreamReader reader = new(stream);
-        StreamWriter writer = new(stream) { AutoFlush = true };
+        Globals.Reader = new(stream);
+        Globals.Writer = new(stream) { AutoFlush = true };
         string message;
 
-        Thread hiloReader = new(() => serverResponse(reader)){IsBackground = true};
+        Thread hiloReader = new(() => serverResponse()){IsBackground = true};
         hiloReader.Start();
 
+        setNickname();
+
+        System.Threading.SpinWait.SpinUntil( () => Globals.loggedIn );
+
         while(true){
+            string output;
             message = Console.ReadLine().Trim();
-            if (message == "EXIT") break;
-            writer.WriteLine(message);
+            
+            if(message == "EXIT") {break;}
+            if (message.StartsWith("/")){
+                output = message.TrimStart("/").ToString();
+            }
+            else
+            {
+                output = "MSG:" + message;
+            }
+            Globals.Writer.WriteLine(output);
         }
     }
 
-    private static void serverResponse(StreamReader reader)
+    private static void setNickname()
+    {
+        Console.Write("Ingrese su nickname: ");
+        var nick = Console.ReadLine().Trim();
+        Globals.Writer.WriteLine($"HELLO:{nick}");
+    }
+
+    private static void serverResponse()
     {
         while(true){
-            var response = reader.ReadLine();
+            var response = Globals.Reader.ReadLine();
 
             responseHandler(response);
         }
@@ -52,10 +74,11 @@ class Client
         {
         case "OK":
             Console.WriteLine("[OK] " + content);
+            Globals.loggedIn = true;
             break;
         case "ERROR":
             Console.WriteLine("[ERROR] " + response);
-            //ToDo: crear funcion setNickname Y volver a llamarla en case de error
+            setNickname();
             break;
         case "JOIN":
             Console.WriteLine($"[+] {content} se conectó.");
@@ -72,4 +95,11 @@ class Client
         }
     }
 
+}
+
+public static class Globals
+{
+    public static bool loggedIn {get;set;}
+    public static StreamReader Reader {get;set;}
+    public static StreamWriter Writer {get;set;}
 }
